@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Platform</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #fbe3e8;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 80%;
+            max-width: 600px;
+            text-align: center;
+        }
+
+        #question {
+            margin-bottom: 20px;
+        }
+
+        .answer-btn {
+            display: block;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 10px;
+            margin: 10px 0;
+            width: 100%;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .answer-btn:hover {
+            background-color: #0056b3;
+        }
+
+        #next-btn {
+            background-color: #00CED1;
+            color: #fff;
+            border: none;
+            padding: 10px;
+            width: 100%;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            display: none;
+        }
+
+        #next-btn:hover {
+            background-color: #00FFFF;
+        }
+
+        #feedback {
+            margin-top: 20px;
+        }
+
+        .correct {
+            background-color: #28a745 !important;
+        }
+
+        .wrong {
+            background-color: #dc3545 !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="quiz-container">
+            <h2 id="question"></h2>
+            <div id="answers">
+                <button class="answer-btn" onclick="selectAnswer(0)"></button>
+                <button class="answer-btn" onclick="selectAnswer(1)"></button>
+                <button class="answer-btn" onclick="selectAnswer(2)"></button>
+                <button class="answer-btn" onclick="selectAnswer(3)"></button>
+            </div>
+            <button id="next-btn" onclick="nextQuestion()">Next</button>
+            <div id="feedback"></div>
+        </div>
+    </div>
+    <script>
+        const quizData = [
+            {
+                question: "What is 5 + 3?",
+                answers: ["5", "8", "10", "15"],
+                correct: 1
+            },
+            {
+                question: "What is 12 - 4?",
+                answers: ["8", "9", "7", "6"],
+                correct: 0
+            },
+            {
+                question: "What is 3 x 3?",
+                answers: ["6", "3", "9", "12"],
+                correct: 2
+            },
+            {
+                question: "What is 16 ÷ 4?",
+                answers: ["2", "4", "8", "6"],
+                correct: 1
+            },
+            {
+                question: "What is 7 + 2?",
+                answers: ["5", "8", "9", "10"],
+                correct: 2
+            },
+            {
+                question: "What is 15 - 5?",
+                answers: ["5", "8", "10", "12"],
+                correct: 2
+            },
+            {
+                question: "What is 6 x 2?",
+                answers: ["10", "11", "12", "13"],
+                correct: 2
+            },
+            {
+                question: "What is 20 ÷ 5?",
+                answers: ["2", "4", "8", "5"],
+                correct: 1
+            },
+            {
+                question: "What is 4 + 4?",
+                answers: ["6", "8", "10", "12"],
+                correct: 1
+            },
+            {
+                question: "What is 10 - 2?",
+                answers: ["7", "8", "9", "10"],
+                correct: 1
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+
+        const questionElement = document.getElementById("question");
+        const answerButtons = document.querySelectorAll(".answer-btn");
+        const nextButton = document.getElementById("next-btn");
+        const feedbackElement = document.getElementById("feedback");
+
+        function startQuiz() {
+            currentQuestionIndex = 0;
+            score = 0;
+            nextButton.style.display = "none";
+            nextButton.innerText = "Next";
+            nextButton.onclick = nextQuestion;
+            showQuestion();
+        }
+
+        function showQuestion() {
+            resetState();
+            const currentQuestion = quizData[currentQuestionIndex];
+            questionElement.innerText = currentQuestion.question;
+            answerButtons.forEach((button, index) => {
+                button.innerText = currentQuestion.answers[index];
+                button.dataset.correct = index == currentQuestion.correct;
+                button.style.display = "block";
+            });
+        }
+
+        function resetState() {
+            feedbackElement.innerText = "";
+            nextButton.style.display = "none";
+            answerButtons.forEach(button => {
+                button.disabled = false;
+                button.classList.remove("correct", "wrong");
+            });
+        }
+
+        function selectAnswer(index) {
+            const selectedButton = answerButtons[index];
+            const correct = selectedButton.dataset.correct === "true";
+            if (correct) {
+                score++;
+                feedbackElement.innerText = "Correct!";
+                selectedButton.classList.add("correct");
+            } else {
+                feedbackElement.innerText = "Wrong!";
+                selectedButton.classList.add("wrong");
+                // Show the correct answer in green
+                answerButtons.forEach(button => {
+                    if (button.dataset.correct === "true") {
+                        button.classList.add("correct");
+                    }
+                });
+            }
+            answerButtons.forEach(button => {
+                button.disabled = true;
+            });
+            nextButton.style.display = "block";
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < quizData.length) {
+                showQuestion();
+            } else {
+                showScore();
+            }
+        }
+
+        function showScore() {
+            resetState();
+            answerButtons.forEach(button => {
+                button.style.display = "none";
+            });
+            questionElement.innerHTML = `<h1>Thank you for your response</h1>`;
+            feedbackElement.innerText = `You scored ${score} out of ${quizData.length}!`;
+            nextButton.innerText = "Restart";
+            nextButton.style.display = "block";
+            nextButton.onclick = startQuiz;
+        }
+
+        startQuiz();
+    </script>
+</body>
+</html>
