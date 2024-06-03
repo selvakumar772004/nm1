@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -74,12 +75,18 @@
         .wrong {
             background-color: #dc3545 !important;
         }
+
+        #timer {
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div id="quiz-container">
             <h2 id="question"></h2>
+            <div id="timer">Time left: <span id="time">15</span> seconds</div>
             <div id="answers">
                 <button class="answer-btn" onclick="selectAnswer(0)"></button>
                 <button class="answer-btn" onclick="selectAnswer(1)"></button>
@@ -146,11 +153,15 @@
 
         let currentQuestionIndex = 0;
         let score = 0;
+        let timer;
+        let timeLeft;
 
         const questionElement = document.getElementById("question");
         const answerButtons = document.querySelectorAll(".answer-btn");
         const nextButton = document.getElementById("next-btn");
         const feedbackElement = document.getElementById("feedback");
+        const timerElement = document.getElementById("timer");
+        const timeElement = document.getElementById("time");
 
         function startQuiz() {
             currentQuestionIndex = 0;
@@ -170,9 +181,11 @@
                 button.dataset.correct = index == currentQuestion.correct;
                 button.style.display = "block";
             });
+            startTimer();
         }
 
         function resetState() {
+            clearInterval(timer);
             feedbackElement.innerText = "";
             nextButton.style.display = "none";
             answerButtons.forEach(button => {
@@ -198,6 +211,7 @@
                     }
                 });
             }
+            clearInterval(timer);
             answerButtons.forEach(button => {
                 button.disabled = true;
             });
@@ -223,6 +237,33 @@
             nextButton.innerText = "Restart";
             nextButton.style.display = "block";
             nextButton.onclick = startQuiz;
+        }
+
+        function startTimer() {
+            timeLeft = 15;
+            timeElement.innerText = timeLeft;
+            timer = setInterval(() => {
+                timeLeft--;
+                timeElement.innerText = timeLeft;
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    showCorrectAnswerForSeconds();
+                }
+            }, 1000);
+        }
+
+        function showCorrectAnswerForSeconds() {
+            answerButtons.forEach(button => {
+                if (button.dataset.correct === "true") {
+                    button.classList.add("correct");
+                } else {
+                    button.classList.add("wrong");
+                }
+                button.disabled = true;
+            });
+            setTimeout(() => {
+                nextQuestion();
+            }, 2000); // Show the correct answer for 2 seconds
         }
 
         startQuiz();
